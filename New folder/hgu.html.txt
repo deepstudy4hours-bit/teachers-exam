@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teachers Exam (MCQ) — 60 Minutes</title>
+  <style>
+    :root{
+      --blue:#0b4db8;
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --line:#e6edf0;
+      --text:#0f172a;
+      --muted:#64748b;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+    .wrap{max-width:980px;margin:16px auto;padding:12px;display:grid;gap:12px}
+    .topbar{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      position:sticky; top:10px; z-index:10;
+    }
+    .brand{display:flex;flex-direction:column;gap:2px}
+    .brand .t{font-weight:900}
+    .brand .s{font-size:12px;color:var(--muted)}
+    .timer{display:flex;gap:10px;align-items:center}
+    .pill{
+      padding:8px 10px;border-radius:999px;
+      background:#eef5ff;border:1px solid #d8e6ff;
+      font-weight:900;color:#0b2a6b;
+      font-variant-numeric:tabular-nums;
+      white-space:nowrap;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn.primary{background:var(--blue);color:#fff;border-color:transparent}
+    .btn.danger{background:var(--bad);color:#fff;border-color:transparent}
+    .grid{display:grid;grid-template-columns: 1fr; gap:12px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:12px;
+    }
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    label{font-size:12px;color:var(--muted);font-weight:900}
+    input{
+      width:100%;
+      padding:11px 12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      font-weight:900;
+      outline:none;
+    }
+    input:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    .qHead{
+      display:flex;gap:10px;align-items:flex-start;justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .qMeta{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{
+      font-size:12px;font-weight:900;
+      padding:6px 10px;border-radius:999px;
+      background:#f1f5f9;border:1px solid var(--line);color:#0f172a;
+    }
+    .chip.blue{background:#eef5ff;border-color:#d8e6ff;color:#0b2a6b}
+    .qText{font-weight:1000;font-size:15px;line-height:1.45}
+    .opts{display:grid;gap:8px;margin-top:10px}
+    .opt{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px;
+      display:flex; gap:10px; align-items:flex-start;
+      cursor:pointer;
+      background:#fff;
+    }
+    .opt input{width:auto;margin-top:2px}
+    .opt:hover{border-color:#cbd5e1}
+    .footer{
+      display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center
+    }
+    .small{font-size:12px;color:var(--muted);font-weight:800}
+    .status{font-weight:1000}
+    .status.pass{color:var(--ok)}
+    .status.fail{color:var(--bad)}
+    .hidden{display:none !important}
+    @media (max-width: 720px){
+      .row2{grid-template-columns:1fr}
+      .timer{flex-wrap:wrap;justify-content:flex-end}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="t">Teachers-Only MCQ Exam</div>
+      <div class="s">বাংলা • ইংরেজি • সাধারণ জ্ঞান • গণিত — 60 Minutes</div>
+    </div>
+    <div class="timer">
+      <div class="pill" id="pillInfo">Total: <span id="totalQ">0</span> প্রশ্ন • Full: <span id="fullMark">0</span></div>
+      <div class="pill" id="pillTime">⏳ <span id="timeLeft">60:00</span></div>
+      <button class="btn primary" id="btnSubmit">Submit</button>
+    </div>
+  </div>
+
+  <!-- Candidate Info -->
+  <div class="card">
+    <div class="row2">
+      <div>
+        <label>Teacher Name</label>
+        <input id="name" placeholder="Your name" />
+      </div>
+      <div>
+        <label>Mobile</label>
+        <input id="mobile" placeholder="01XXXXXXXXX" />
+      </div>
+    </div>
+    <div class="row2" style="margin-top:10px">
+      <div>
+        <label>Email (optional)</label>
+        <input id="email" placeholder="email@example.com" />
+      </div>
+      <div>
+        <label>Candidate ID (optional)</label>
+        <input id="cid" placeholder="e.g. T-2026-001" />
+      </div>
+    </div>
+    <div class="small" style="margin-top:10px">
+      নোট: সময় শেষ হলে অটো সাবমিট হবে।
+    </div>
+  </div>
+
+  <!-- Questions -->
+  <div class="grid" id="questions"></div>
+
+  <!-- Result -->
+  <div class="card hidden" id="resultCard">
+    <div class="footer">
+      <div>
+        <div style="font-weight:1000;font-size:16px">Result</div>
+        <div class="small" id="resultLine">—</div>
+      </div>
+      <div style="text-align:right">
+        <div class="status" id="passFail">—</div>
+        <div class="small" id="sheetStatus">—</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/** =========================
+ *  CONFIG (Edit easily)
+ *  ========================= */
+const CONFIG = {
+  durationMinutes: 60,
+  passMark: 45,               // change if needed
+  fullMark: 80,               // change if needed (used for percent + display)
+  negativeMarking: false,     // true করলে ভুলে -1 ইত্যাদি লাগাতে পারো (এখন off)
+  sheetEndpoint: "SCRIPT_URL_HERE" // <-- Google Apps Script Web App URL বসাও
+};
+
+// প্রশ্নগুলো এখানে বসাবে (তুমি চাইলে 80+ প্রশ্ন দিতে পারো)
+// correct: 0/1/2/3 (A,B,C,D index)
+const QUESTIONS = [
+
+/* ================= বাংলা (20) ================= */
+{ id:"B1", subject:"বাংলা", q:"বাংলা ভাষার উৎপত্তি কোন ভাষা থেকে?", opts:["সংস্কৃত","পালি","প্রাকৃত","আরবি"], correct:2 },
+{ id:"B2", subject:"বাংলা", q:"বাংলা একাডেমি প্রতিষ্ঠিত হয় কত সালে?", opts:["১৯৫২","১৯৫৫","১৯৬১","১৯৭১"], correct:1 },
+{ id:"B3", subject:"বাংলা", q:"‘মধুশালা’ কাব্যগ্রন্থের রচয়িতা কে?", opts:["নজরুল","হরিবংশ রায় বচ্চন","জীবনানন্দ","সুকান্ত"], correct:1 },
+{ id:"B4", subject:"বাংলা", q:"বাংলা সাহিত্যের প্রথম উপন্যাস কোনটি?", opts:["দুর্গেশনন্দিনী","কপালকুণ্ডলা","আনন্দমঠ","পদ্মরাগ"], correct:0 },
+{ id:"B5", subject:"বাংলা", q:"‘আমার সোনার বাংলা’ গানটি কোন উপলক্ষে লেখা?", opts:["ভাষা আন্দোলন","বঙ্গভঙ্গ","স্বাধীনতা","পলাশী"], correct:1 },
+{ id:"B6", subject:"বাংলা", q:"রবীন্দ্রনাথ কোন সালে নোবেল পুরস্কার পান?", opts:["১৯০৫","১৯১১","১৯১৩","১৯২১"], correct:2 },
+{ id:"B7", subject:"বাংলা", q:"‘পথের পাঁচালি’ কার লেখা?", opts:["শরৎচন্দ্র","বিভূতিভূষণ","মানিক","তারাশঙ্কর"], correct:1 },
+{ id:"B8", subject:"বাংলা", q:"বাংলা ভাষা আন্দোলনের শহীদ দিবস কবে?", opts:["২১ ফেব্রুয়ারি","২৬ মার্চ","১৬ ডিসেম্বর","৭ মার্চ"], correct:0 },
+{ id:"B9", subject:"বাংলা", q:"বাংলা ভাষা কোন ভাষা পরিবারভুক্ত?", opts:["সেমিটিক","ইন্দো-ইউরোপীয়","দ্রাবিড়","তুর্কি"], correct:1 },
+{ id:"B10", subject:"বাংলা", q:"‘বিদ্রোহী’ কবিতার রচয়িতা কে?", opts:["রবীন্দ্রনাথ","নজরুল","সুকান্ত","জীবনানন্দ"], correct:1 },
+{ id:"B11", subject:"বাংলা", q:"‘কবর’ নাটকের রচয়িতা কে?", opts:["নজরুল","মুনীর চৌধুরী","শওকত ওসমান","সেলিম আল দীন"], correct:1 },
+{ id:"B12", subject:"বাংলা", q:"বাংলা সাহিত্যের ‘চল্লিশের কবি’ কে?", opts:["জীবনানন্দ","সুকান্ত","নজরুল","বুদ্ধদেব"], correct:1 },
+{ id:"B13", subject:"বাংলা", q:"বাংলা গদ্যের জনক কে?", opts:["ঈশ্বরচন্দ্র বিদ্যাসাগর","বঙ্কিম","রবীন্দ্রনাথ","মাইকেল"], correct:0 },
+{ id:"B14", subject:"বাংলা", q:"‘মেঘনাদবধ কাব্য’ কার লেখা?", opts:["রবীন্দ্রনাথ","মাইকেল","নজরুল","বঙ্কিম"], correct:1 },
+{ id:"B15", subject:"বাংলা", q:"বাংলা ভাষার আন্তর্জাতিক মাতৃভাষা দিবস কবে?", opts:["২১ ফেব্রুয়ারি","২৬ মার্চ","১৬ ডিসেম্বর","১ মে"], correct:0 },
+{ id:"B16", subject:"বাংলা", q:"বাংলা সাহিত্যে ‘সবুজপত্র’ পত্রিকার সম্পাদক কে?", opts:["প্রমথ চৌধুরী","রবীন্দ্রনাথ","নজরুল","জীবনানন্দ"], correct:0 },
+{ id:"B17", subject:"বাংলা", q:"বাংলা বর্ণমালায় মোট বর্ণ কয়টি?", opts:["৪৮","৫০","৫২","৫১"], correct:3 },
+{ id:"B18", subject:"বাংলা", q:"‘লালসালু’ উপন্যাসের লেখক কে?", opts:["শওকত ওসমান","সৈয়দ ওয়ালীউল্লাহ","তারাশঙ্কর","মানিক"], correct:1 },
+{ id:"B19", subject:"বাংলা", q:"‘রূপসী বাংলা’ কার কাব্যগ্রন্থ?", opts:["জীবনানন্দ","নজরুল","সুকান্ত","রবীন্দ্রনাথ"], correct:0 },
+{ id:"B20", subject:"বাংলা", q:"বাংলা ভাষার প্রথম ব্যাকরণ রচনা করেন কে?", opts:["রামমোহন","নাথানিয়েল হ্যালহেড","বিদ্যাসাগর","বঙ্কিম"], correct:1 },
+
+/* ================= ইংরেজি (20) ================= */
+{ id:"E1", subject:"English", q:"Choose the correct synonym of 'Rapid'.", opts:["Slow","Fast","Weak","Late"], correct:1 },
+{ id:"E2", subject:"English", q:"Choose the antonym of 'Honest'.", opts:["Truthful","Sincere","Dishonest","Kind"], correct:2 },
+{ id:"E3", subject:"English", q:"He ___ to school every day.", opts:["go","goes","going","gone"], correct:1 },
+{ id:"E4", subject:"English", q:"Choose the correct plural of 'Child'.", opts:["Childs","Children","Childrens","Childes"], correct:1 },
+{ id:"E5", subject:"English", q:"I have lived here ___ 2010.", opts:["since","for","from","by"], correct:0 },
+{ id:"E6", subject:"English", q:"Which one is a noun?", opts:["Run","Quick","Happiness","Slowly"], correct:2 },
+{ id:"E7", subject:"English", q:"Choose the correct spelling.", opts:["Recieve","Receive","Receeve","Receiv"], correct:1 },
+{ id:"E8", subject:"English", q:"She is ___ honest girl.", opts:["a","an","the","no article"], correct:1 },
+{ id:"E9", subject:"English", q:"Opposite of 'Victory' is?", opts:["Win","Success","Defeat","Joy"], correct:2 },
+{ id:"E10", subject:"English", q:"Choose correct sentence.", opts:["He don't know.","He doesn't know.","He didn't knew.","He not knows."], correct:1 },
+{ id:"E11", subject:"English", q:"Which is a preposition?", opts:["Very","Under","Quick","Happy"], correct:1 },
+{ id:"E12", subject:"English", q:"I ___ my homework already.", opts:["do","did","have done","doing"], correct:2 },
+{ id:"E13", subject:"English", q:"Plural of 'Mouse'?", opts:["Mouses","Mices","Mouse","Mice"], correct:3 },
+{ id:"E14", subject:"English", q:"Choose correct tense: 'She was reading'.", opts:["Present","Past Continuous","Future","Past Perfect"], correct:1 },
+{ id:"E15", subject:"English", q:"Antonym of 'Ancient'?", opts:["Old","Modern","Antique","Past"], correct:1 },
+{ id:"E16", subject:"English", q:"Which is an adjective?", opts:["Beauty","Beautiful","Beautify","Beautifully"], correct:1 },
+{ id:"E17", subject:"English", q:"He is afraid ___ dogs.", opts:["of","from","with","for"], correct:0 },
+{ id:"E18", subject:"English", q:"Correct passive: 'He writes a letter.'", opts:["A letter is written by him.","A letter was written.","A letter wrote.","Letter is write."], correct:0 },
+{ id:"E19", subject:"English", q:"Choose correct article: ___ sun rises in the east.", opts:["A","An","The","No article"], correct:2 },
+{ id:"E20", subject:"English", q:"Which one is an adverb?", opts:["Quick","Quickly","Quicker","Quickness"], correct:1 },
+
+/* ================= সাধারণ জ্ঞান (20) ================= */
+{ id:"G1", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় সংগীতের রচয়িতা কে?", opts:["নজরুল","রবীন্দ্রনাথ","জসীমউদ্দীন","মাইকেল"], correct:1 },
+{ id:"G2", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের রাজধানী কোনটি?", opts:["চট্টগ্রাম","ঢাকা","খুলনা","রাজশাহী"], correct:1 },
+{ id:"G3", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশ স্বাধীনতা লাভ করে কবে?", opts:["১৯৫২","১৯৬৯","১৯৭১","১৯৭৫"], correct:2 },
+{ id:"G4", subject:"সাধারণ জ্ঞান", q:"জাতিসংঘ প্রতিষ্ঠিত হয় কত সালে?", opts:["১৯৪৫","১৯৪৭","১৯৫২","১৯৬১"], correct:0 },
+{ id:"G5", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় ফুল কী?", opts:["গোলাপ","শাপলা","পদ্ম","লিলি"], correct:1 },
+{ id:"G6", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় পশু?", opts:["বাঘ","হাতি","হরিণ","সিংহ"], correct:0 },
+{ id:"G7", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় পতাকার রং কয়টি?", opts:["১","২","৩","৪"], correct:1 },
+{ id:"G8", subject:"সাধারণ জ্ঞান", q:"জাতিসংঘের সদর দপ্তর কোথায়?", opts:["লন্ডন","প্যারিস","নিউ ইয়র্ক","জেনেভা"], correct:2 },
+{ id:"G9", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের মুদ্রার নাম কী?", opts:["রুপি","টাকা","ডলার","রিয়াল"], correct:1 },
+{ id:"G10", subject:"সাধারণ জ্ঞান", q:"বিশ্ব পরিবেশ দিবস কবে?", opts:["৫ জুন","১৬ ডিসেম্বর","২১ ফেব্রুয়ারি","১ মে"], correct:0 },
+{ id:"G11", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় ফল?", opts:["আম","কাঁঠাল","কলা","লিচু"], correct:1 },
+{ id:"G12", subject:"সাধারণ জ্ঞান", q:"বিশ্ব জনসংখ্যা দিবস কবে?", opts:["১১ জুলাই","৮ মার্চ","৫ জুন","১ মে"], correct:0 },
+{ id:"G13", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের বৃহত্তম সমুদ্রবন্দর?", opts:["চট্টগ্রাম","মোংলা","পায়রা","কক্সবাজার"], correct:0 },
+{ id:"G14", subject:"সাধারণ জ্ঞান", q:"জাতীয় শহীদ মিনার কোথায়?", opts:["ঢাকা","রাজশাহী","চট্টগ্রাম","খুলনা"], correct:0 },
+{ id:"G15", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের প্রথম রাষ্ট্রপতি কে?", opts:["মুজিব","নজরুল","তাজউদ্দীন","ইয়াহিয়া"], correct:0 },
+{ id:"G16", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় পাখি?", opts:["দোয়েল","ময়না","কাক","চিল"], correct:0 },
+{ id:"G17", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের বৃহত্তম জেলা কোনটি?", opts:["রাঙামাটি","চট্টগ্রাম","কুমিল্লা","দিনাজপুর"], correct:0 },
+{ id:"G18", subject:"সাধারণ জ্ঞান", q:"জাতীয় স্মৃতিসৌধ কোথায়?", opts:["ঢাকা","সাভার","গাজীপুর","নারায়ণগঞ্জ"], correct:1 },
+{ id:"G19", subject:"সাধারণ জ্ঞান", q:"বাংলাদেশের জাতীয় কবি কে?", opts:["রবীন্দ্রনাথ","নজরুল","জসীমউদ্দীন","সুকান্ত"], correct:1 },
+{ id:"G20", subject:"সাধারণ জ্ঞান", q:"বিশ্ব মাতৃভাষা দিবস কবে?", opts:["২১ ফেব্রুয়ারি","২৬ মার্চ","১৬ ডিসেম্বর","৫ জুন"], correct:0 },
+
+/* ================= গণিত (20) ================= */
+{ id:"M1", subject:"গণিত", q:"20% of 200 = ?", opts:["20","30","40","50"], correct:2 },
+{ id:"M2", subject:"গণিত", q:"15 × 6 = ?", opts:["80","85","90","95"], correct:2 },
+{ id:"M3", subject:"গণিত", q:"√144 = ?", opts:["10","11","12","13"], correct:2 },
+{ id:"M4", subject:"গণিত", q:"(5+3)×4 = ?", opts:["20","28","32","40"], correct:1 },
+{ id:"M5", subject:"গণিত", q:"1000 এর 10% কত?", opts:["10","50","100","200"], correct:2 },
+{ id:"M6", subject:"গণিত", q:"x = 4 হলে 2x + 3 = ?", opts:["9","10","11","12"], correct:0 },
+{ id:"M7", subject:"গণিত", q:"3² + 4² = ?", opts:["25","49","16","7"], correct:0 },
+{ id:"M8", subject:"গণিত", q:"এক ডজন = ?", opts:["10","11","12","13"], correct:2 },
+{ id:"M9", subject:"গণিত", q:"25% of 400 = ?", opts:["50","75","100","125"], correct:2 },
+{ id:"M10", subject:"গণিত", q:"7 × 8 = ?", opts:["54","56","58","60"], correct:1 },
+{ id:"M11", subject:"গণিত", q:"(10+5)/5 = ?", opts:["2","3","4","5"], correct:1 },
+{ id:"M12", subject:"গণিত", q:"45 ÷ 9 = ?", opts:["3","4","5","6"], correct:2 },
+{ id:"M13", subject:"গণিত", q:"2³ = ?", opts:["6","8","9","12"], correct:1 },
+{ id:"M14", subject:"গণিত", q:"এক ঘন্টায় মিনিট কয়টি?", opts:["30","45","60","90"], correct:2 },
+{ id:"M15", subject:"গণিত", q:"120 এর 25% = ?", opts:["20","25","30","40"], correct:2 },
+{ id:"M16", subject:"গণিত", q:"9² = ?", opts:["18","27","72","81"], correct:3 },
+{ id:"M17", subject:"গণিত", q:"(6×5)−10 = ?", opts:["10","15","20","25"], correct:2 },
+{ id:"M18", subject:"গণিত", q:"√81 = ?", opts:["7","8","9","10"], correct:2 },
+{ id:"M19", subject:"গণিত", q:"এক শতকে কয়টি?", opts:["10","50","100","1000"], correct:2 },
+{ id:"M20", subject:"গণিত", q:"5 + 5 × 2 = ?", opts:["20","15","10","25"], correct:1 }
+
+];
+
+// optional: shuffle questions
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// You can set to true if you want random order each time
+const QUESTIONS_FINAL = (QUESTIONS);
+
+/** =========================
+ *  UI Render
+ *  ========================= */
+const $ = (id)=>document.getElementById(id);
+const qWrap = $("questions");
+$("totalQ").textContent = QUESTIONS_FINAL.length;
+$("fullMark").textContent = CONFIG.fullMark;
+
+const answers = {}; // {qid: selectedIndex}
+
+function renderQuestions(){
+  qWrap.innerHTML = "";
+  QUESTIONS_FINAL.forEach((q, idx)=>{
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.qid = q.id;
+
+    card.innerHTML = `
+      <div class="qHead">
+        <div>
+          <div class="qMeta">
+            <span class="chip blue">Q${idx+1}</span>
+            <span class="chip">${q.subject}</span>
+          </div>
+          <div class="qText" style="margin-top:8px">${escapeHtml(q.q)}</div>
+        </div>
+      </div>
+      <div class="opts">
+        ${q.opts.map((opt, i)=>`
+          <label class="opt">
+            <input type="radio" name="q_${q.id}" value="${i}">
+            <div><div style="font-weight:900">${String.fromCharCode(65+i)}.</div>
+            <div style="margin-top:2px">${escapeHtml(opt)}</div></div>
+          </label>
+        `).join("")}
+      </div>
+    `;
+
+    // bind
+    card.querySelectorAll(`input[name="q_${q.id}"]`).forEach(r=>{
+      r.addEventListener("change", ()=>{
+        answers[q.id] = Number(r.value);
+      });
+    });
+
+    qWrap.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+renderQuestions();
+
+/** =========================
+ *  Timer (60 min)
+ *  ========================= */
+let remaining = CONFIG.durationMinutes * 60; // seconds
+let timer = null;
+function fmtTime(sec){
+  const m = Math.floor(sec/60);
+  const s = sec%60;
+  return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+function tick(){
+  $("timeLeft").textContent = fmtTime(remaining);
+  if(remaining <= 0){
+    clearInterval(timer);
+    submitExam(true);
+    return;
+  }
+  remaining--;
+}
+timer = setInterval(tick, 1000);
+tick();
+
+/** =========================
+ *  Scoring
+ *  ========================= */
+function computeScore(){
+  let totalCorrect = 0;
+  const subjectStats = {}; // {subject:{correct,total}}
+  QUESTIONS_FINAL.forEach(q=>{
+    if(!subjectStats[q.subject]) subjectStats[q.subject] = {correct:0, total:0};
+    subjectStats[q.subject].total += 1;
+    const chosen = answers[q.id];
+    if(typeof chosen === "number" && chosen === q.correct){
+      totalCorrect += 1;
+      subjectStats[q.subject].correct += 1;
+    }
+  });
+
+  // map: per question = CONFIG.fullMark / totalQ (works even if not 80)
+  const markPerQ = CONFIG.fullMark / QUESTIONS_FINAL.length;
+  const score = Math.round(totalCorrect * markPerQ * 100) / 100;
+  const percent = Math.round((score / CONFIG.fullMark) * 10000) / 100;
+
+  // subject marks (scaled)
+  const subjectResult = Object.entries(subjectStats).map(([sub, st])=>{
+    const subScore = Math.round(st.correct * markPerQ * 100) / 100;
+    const subFull = Math.round(st.total * markPerQ * 100) / 100;
+    const subPct = subFull ? Math.round((subScore/subFull)*10000)/100 : 0;
+    return {subject:sub, correct:st.correct, totalQ:st.total, score:subScore, full:subFull, percent:subPct};
+  });
+
+  return { totalCorrect, score, percent, subjectResult };
+}
+
+/** =========================
+ *  Submit to Google Sheet
+ *  ========================= */
+let submitted = false;
+
+$("btnSubmit").addEventListener("click", ()=>submitExam(false));
+
+async function submitExam(isAuto){
+  if(submitted) return;
+  submitted = true;
+  clearInterval(timer);
+
+  const name = $("name").value.trim();
+  const mobile = $("mobile").value.trim();
+  const email = $("email").value.trim();
+  const cid = $("cid").value.trim();
+
+  // basic validation (minimal)
+  if(!name || !mobile){
+    alert("Name এবং Mobile দিন (অন্তত এই ২টা লাগবে)।");
+    submitted = false;
+    timer = setInterval(tick, 1000);
+    return;
+  }
+
+  const res = computeScore();
+  const pass = res.score >= CONFIG.passMark;
+
+  $("resultCard").classList.remove("hidden");
+  $("passFail").textContent = pass ? "PASS" : "FAIL";
+  $("passFail").className = "status " + (pass ? "pass":"fail");
+
+  $("resultLine").textContent =
+    `Score: ${res.score}/${CONFIG.fullMark} • ${res.percent}% • Correct: ${res.totalCorrect}/${QUESTIONS_FINAL.length}` +
+    (isAuto ? " • (Auto Submitted)" : "");
+
+  // payload to sheet
+  const payload = {
+    submittedAt: new Date().toISOString(),
+    name, mobile, email, candidateId: cid,
+    durationMinutes: CONFIG.durationMinutes,
+    fullMark: CONFIG.fullMark,
+    passMark: CONFIG.passMark,
+    score: res.score,
+    percent: res.percent,
+    passFail: pass ? "PASS":"FAIL",
+    totalCorrect: res.totalCorrect,
+    totalQuestions: QUESTIONS_FINAL.length,
+    subjects: res.subjectResult,
+    // optional: store answers (can be big)
+    answers
+  };
+
+  // show sending status
+  $("sheetStatus").textContent = "Sending to Google Sheet…";
+
+  try{
+    const resp = await fetch(CONFIG.sheetEndpoint, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await resp.json().catch(()=>({ok:false}));
+    if(resp.ok && data && data.ok){
+      $("sheetStatus").textContent = "✅ Saved to Google Sheet";
+    }else{
+      $("sheetStatus").textContent = "⚠️ Sheet save failed (check script URL / deploy access)";
+    }
+  }catch(e){
+    $("sheetStatus").textContent = "⚠️ Network/Script error (check endpoint)";
+  }
+
+  // lock inputs
+  document.querySelectorAll("input,button").forEach(el=>{
+    if(el.id === "btnShot") return;
+    if(el.id === "btnSubmit") el.disabled = true;
+  });
+
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+</script>
+</body>
+</html>
